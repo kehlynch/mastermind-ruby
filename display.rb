@@ -26,7 +26,7 @@ class Display
         blue: :blue,
         yellow: :yellow,
         purple: :magenta,
-        orange: [:red, :yellow],
+        orange: :red,
         black: :black,
         white: :white
       }
@@ -90,11 +90,7 @@ class Display
   def colour_letters
     if @colorize
       @code_colors.map do |c|
-        if @colors[c].is_a?(Symbol)
-          c[0].colorize(color: @colors[c], background: :grey)
-        else
-          c[0].colorize(color: @colors[c][0], background: @colors[c][1])
-        end
+        c[0].colorize(color: @colors[c])
       end.join
     else
       @code_colors.map { |c| c[0] }.join
@@ -102,7 +98,8 @@ class Display
   end
 
   def get_input(message)
-    output("#{message} > ", :print)
+    output("#{message} >", :print)
+    print(" ")
     gets.strip
   end
 
