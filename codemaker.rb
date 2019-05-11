@@ -1,19 +1,11 @@
+# maker of the codes. Assumed to be a computer player for now
 class Codemaker
-  def initialize(display)
+  def initialize(display, code_colors)
     @display = display
+    @code_colors = code_colors
   end
 
-  def get_code
-    @code = 4.times.collect{ COLORS.sample }
-  end
-end
-
-class Codebreaker
-  def initialize(display)
-    @display = display
-  end
-
-  def get_guess
-    @display.get_guess
+  def code
+    @code = 4.times.collect { @code_colors.sample }
   end
 end

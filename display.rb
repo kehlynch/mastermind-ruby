@@ -1,75 +1,69 @@
-class Display
-  ICONS = {
-    red: "🔴",
-    green: "💚",
-    blue: "💙",
-    yellow: "💛",
-    purple: "💜",
-    orange: "🍊",
-    blank: "❌",
-    black: "⚫️",
-    white: "⚪️",
-    hidden: "❓"
-  }
+COLORS = {
+  red: :red,
+  green: :green,
+  blue: :blue,
+  yellow: :yellow,
+  purple: :magenta,
+  orange: :red,
+  black: :black,
+  white: :white
+}.freeze
 
+ICONS = {
+  red: '🔴',
+  green: '💚',
+  blue: '💙',
+  yellow: '💛',
+  purple: '💜',
+  orange: '🍊',
+  blank: '❌',
+  black: '⚫️',
+  white: '⚪️',
+  hidden: '❓'
+}.freeze
+
+# class to control input from and output to the user
+class Display
   def initialize(code_colors, debug)
     @code_colors = code_colors
     @debug = debug
     @colorize = false
-    if Gem::Specification::find_all_by_name('colorize').any?
-      require 'colorize'
-      @colorize = true
-      @colors = {
-        red: :red,
-        green: :green,
-        blue: :blue,
-        yellow: :yellow,
-        purple: :magenta,
-        orange: :red,
-        black: :black,
-        white: :white
-      }
-    end
-  end
+    return unless Gem::Specification.find_all_by_name('colorize').any?
 
-  def get_name
-    get_input("What is your name?")
+    require 'colorize'
+    @colorize = true
   end
 
   def get_guess(guess_count)
-    guess_input = get_guess_input(guess_count)
-    letters_lookup = @code_colors.each_with_index.map do |c, i|
-      [[c[0], c], [(i + 1).to_s, c]]
-    end.flatten(1).to_h
-    letters = letters_lookup.keys
-    matches = guess_input.scan(/[#{letters.join}123456]/)
-    if matches.length != 4
+    guess_input = guess_input(guess_count)
+    guess = parse_guess_input(guess_input)
+    if guess.length != 4
       output("please enter 4 colours #{color_letters}")
       get_guess(guess_count)
     else
-      matches.map{ |l| letters_lookup[l] }
+      guess
     end
   end
 
-  def get_play_again?
-    input = get_input("Play again? [yn]")
-    ["y", "yes"].include?(input.downcase)
+  def play_again?
+    input = input('Play again? [yn]')
+    %w[y yes].include?(input.downcase)
   end
 
   def show_code(code)
-    output("Code has been chosen!")
+    output('Code has been chosen!')
     if @debug
       output(pegs_to_icons(code))
     else
-      output(4.times.collect{ ICONS[:hidden] }.join)
+      output(4.times.collect { ICONS[:hidden] }.join)
     end
   end
 
   def show_pegs(guess_pegs, feedback_pegs)
     output(pegs_to_icons(guess_pegs), :print)
-    output(" ", :print)
+    output(' ', :print)
     output(pegs_to_icons(feedback_pegs[0..1]))
-    output(" " * 9, :print)
+    output(' ' * 9, :print)
     output(pegs_to_icons(feedback_pegs[2..3] || []))
   end
 
@@ -80,23 +74,32 @@ class Display
   private
 
   def pegs_to_icons(pegs)
-    pegs.map{ |p| ICONS[p] }.join
+    pegs.map { |p| ICONS[p] }.join
   end
 
-  def get_guess_input(guess_count)
-    if guess_count === 0
-      output("Guess from 6 colours ", :print)
+  def guess_input(guess_count)
+    if guess_count.zero?
+      output('Guess from 6 colours ', :print)
       output(pegs_to_icons(@code_colors))
-      get_input("#{color_letters} or #{color_numbers}")
+      input("#{color_letters} or #{color_numbers}")
     else
-      get_input("guess #{guess_count + 1}")
+      input("guess #{guess_count + 1}")
     end
   end
 
+  def parse_guess_input(guess_input)
+    inputs_to_guesses = @code_colors.each_with_index.map do |c, i|
+      [[c[0], c], [(i + 1).to_s, c]]
+    end.flatten(1).to_h
+    matches = guess_input.scan(/[#{inputs_to_guesses.keys.join}]/)
+    matches.map { |m| inputs_to_guesses[m] }
+  end
+
   def color_letters
+    p @code_colors
     if @colorize
       @code_colors.map do |c|
-        c[0].colorize(color: @colors[c])
+        c[0].colorize(color: COLORS[c])
       end.join
     else
       @code_colors.map { |c| c[0] }.join
@@ -106,25 +109,20 @@ class Display
   def color_numbers
     if @colorize
       @code_colors.each_with_index.map do |c, i|
-        (i + 1).to_s.colorize(color: @colors[c])
+        (i + 1).to_s.colorize(color: COLORS[c])
       end.join
     else
-      @code_colors.enum_with_index.map { |c, i| (i + 1).to_s }.join
+      @code_colors.enum_with_index.map { |_c, i| (i + 1).to_s }.join
     end
   end
 
-  def get_input(message)
+  def input(message)
     output("#{message} >", :print)
-    print(" ")
+    print(' ')
     gets.strip
   end
 
   def output(message, function = :puts)
-    if @colorize
-      # send(function, message.colorize(:background => :light_black))
-      send(function, message)
-    else
-      send(function, message)
-    end
+    send(function, message)
   end
 end
