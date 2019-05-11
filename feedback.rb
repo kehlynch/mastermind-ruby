@@ -8,8 +8,7 @@ class Feedback
     @guess_feedbacks = guess.map { |g| {guess: g, feedback_peg: nil} }
     add_black_pegs
     add_white_pegs
-    add_blanks
-    @pegs = @guess_feedbacks.map { |fg| fg[:feedback_peg] }
+    @pegs = @guess_feedbacks.map { |fg| fg[:feedback_peg] }.reject(&:nil?).sort
   end
 
   ##

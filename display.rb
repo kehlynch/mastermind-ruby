@@ -15,7 +15,6 @@ class Display
   def initialize(code_colors, debug)
     @code_colors = code_colors
     @debug = debug
-    @first_guess = true
     @colorize = false
     if Gem::Specification::find_all_by_name('colorize').any?
       require 'colorize'
@@ -37,8 +36,8 @@ class Display
     get_input("What is your name?")
   end
 
-  def get_guess
-    guess_input = get_input(get_guess_msg)
+  def get_guess(guess_count)
+    guess_input = get_guess_input(guess_count)
     letters_lookup = @code_colors.each_with_index.map do |c, i|
       [[c[0], c], [(i + 1).to_s, c]]
     end.flatten(1).to_h
@@ -46,7 +45,7 @@ class Display
     matches = guess_input.scan(/[#{letters.join}123456]/)
     if matches.length != 4
       output("please enter 4 colours #{color_letters}")
-      get_guess
+      get_guess(guess_count)
     else
       matches.map{ |l| letters_lookup[l] }
     end
@@ -59,15 +58,19 @@ class Display
 
   def show_code(code)
     output("Code has been chosen!")
-    show_pegs(code, @debug)
-  end
-
-  def show_pegs(pegs, show = true)
-    if show
-      output pegs.map{ |p| ICONS[p] }.join
+    if @debug
+      output(pegs_to_icons(code))
     else
       output(4.times.collect{ ICONS[:hidden] }.join)
     end
+  end
+
+  def show_pegs(guess_pegs, feedback_pegs)
+    output(pegs_to_icons(guess_pegs), :print)
+    output(" ", :print)
+    output(pegs_to_icons(feedback_pegs[0..1]))
+    output(" " * 9, :print)
+    output(pegs_to_icons(feedback_pegs[2..3] || []))
   end
 
   def show_victory(guess_count)
@@ -76,14 +79,17 @@ class Display
 
   private
 
-  def get_guess_msg
-    if @first_guess
+  def pegs_to_icons(pegs)
+    pegs.map{ |p| ICONS[p] }.join
+  end
+
+  def get_guess_input(guess_count)
+    if guess_count === 0
       output("Guess from 6 colours ", :print)
-      show_pegs(@code_colors)
-      @first_guess = false
-      "#{color_letters} or #{color_numbers}"
+      output(pegs_to_icons(@code_colors))
+      get_input("#{color_letters} or #{color_numbers}")
     else
-      ""
+      get_input("guess #{guess_count + 1}")
     end
   end
 
@@ -115,7 +121,8 @@ class Display
 
   def output(message, function = :puts)
     if @colorize
-      send(function, message.colorize(:background => :light_black))
+      # send(function, message.colorize(:background => :light_black))
+      send(function, message)
     else
       send(function, message)
     end

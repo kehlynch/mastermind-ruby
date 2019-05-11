@@ -3,7 +3,7 @@ class Codebreaker
     @display = display
   end
 
-  def get_guess
-    @display.get_guess
+  def get_guess(guess_count)
+    @display.get_guess(guess_count)
   end
 end
