@@ -8,7 +8,7 @@ COLORS = [:red, :green, :blue, :yellow, :purple, :orange]
 
 class Mastermind
   def initialize(debug)
-    @display = Display.new(debug)
+    @display = Display.new(COLORS, debug)
     @codemaker = Codemaker.new(@display)
     @codebreaker = Codebreaker.new(@display)
   end

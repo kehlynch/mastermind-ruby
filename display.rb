@@ -1,5 +1,4 @@
 class Display
-
   ICONS = {
     red: "🔴",
     green: "💚",
@@ -13,7 +12,8 @@ class Display
     hidden: "❓"
   }
 
-  def initialize(debug)
+  def initialize(code_colors, debug)
+    @code_colors = code_colors
     @debug = debug
     @first_guess = true
     @colorize = false
@@ -39,9 +39,11 @@ class Display
 
   def get_guess
     guess_input = get_input(get_guess_msg)
-    letters_lookup = COLORS.map{ |c| [c[0], c] }.to_h
+    letters_lookup = @code_colors.each_with_index.map do |c, i|
+      [[c[0], c], [(i + 1).to_s, c]]
+    end.flatten(1).to_h
     letters = letters_lookup.keys
-    matches = guess_input.scan(/[#{letters.join}]/)
+    matches = guess_input.scan(/[#{letters.join}123456]/)
     if matches.length != 4
       output("please enter 4 colours #{colour_letters}")
       get_guess
@@ -58,8 +60,6 @@ class Display
   def show_code(code)
     output("Code has been chosen!")
     show_pegs(code, @debug)
-    output("Guess from 6 colours", :print)
-    show_pegs(COLORS)
   end
 
   def show_pegs(pegs, show = true)
@@ -78,8 +78,10 @@ class Display
 
   def get_guess_msg
     if @first_guess
+      output("Guess from 6 colours ", :print)
+      show_pegs(@code_colors)
       @first_guess = false
-      colour_letters
+      "#{colour_letters} or 123456"
     else
       ""
     end
@@ -87,7 +89,7 @@ class Display
 
   def colour_letters
     if @colorize
-      COLORS.map do |c|
+      @code_colors.map do |c|
         if @colors[c].is_a?(Symbol)
           c[0].colorize(color: @colors[c], background: :grey)
         else
@@ -95,7 +97,7 @@ class Display
         end
       end.join
     else
-      COLORS.map { |c| c[0] }.join
+      @code_colors.map { |c| c[0] }.join
     end
   end
 

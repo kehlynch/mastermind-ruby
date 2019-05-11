@@ -12,11 +12,11 @@ class Round
     @display.show_code(code)
     until code_broken
       guess = @codebreaker.get_guess
+      @guess_count += 1
       @display.show_pegs(guess)
       if guess == code
         code_broken = true
       else
-        @guess_count += 1
         feedback_pegs = Feedback.new(code, guess).pegs
         @display.show_pegs(feedback_pegs)
       end
