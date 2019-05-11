@@ -45,7 +45,7 @@ class Display
     letters = letters_lookup.keys
     matches = guess_input.scan(/[#{letters.join}123456]/)
     if matches.length != 4
-      output("please enter 4 colours #{colour_letters}")
+      output("please enter 4 colours #{color_letters}")
       get_guess
     else
       matches.map{ |l| letters_lookup[l] }
@@ -81,19 +81,29 @@ class Display
       output("Guess from 6 colours ", :print)
       show_pegs(@code_colors)
       @first_guess = false
-      "#{colour_letters} or 123456"
+      "#{color_letters} or #{color_numbers}"
     else
       ""
     end
   end
 
-  def colour_letters
+  def color_letters
     if @colorize
       @code_colors.map do |c|
         c[0].colorize(color: @colors[c])
       end.join
     else
       @code_colors.map { |c| c[0] }.join
+    end
+  end
+
+  def color_numbers
+    if @colorize
+      @code_colors.each_with_index.map do |c, i|
+        (i + 1).to_s.colorize(color: @colors[c])
+      end.join
+    else
+      @code_colors.enum_with_index.map { |c, i| (i + 1).to_s }.join
     end
   end
 
