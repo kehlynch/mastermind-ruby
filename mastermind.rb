@@ -1,8 +1,10 @@
+require './feedback.rb'
+
 COLORS = [:red, :green, :blue, :yellow, :purple, :orange]
 
 class Mastermind
-  def initialize
-    @display = Display.new
+  def initialize(debug)
+    @display = Display.new(debug)
     @codemaker = Codemaker.new(@display)
     @codebreaker = Codebreaker.new(@display)
   end
@@ -12,30 +14,6 @@ class Mastermind
     round.play
     if @display.get_play_again?
       play
-    end
-  end
-
-  private
-
-  def self.get_result(code, guess)
-    guess.each_with_index.map do |guess_color, index|
-      if code[index] == guess_color
-        :black
-      elsif self.award_white?(code, guess, index, guess_color)
-        :white
-      else
-        :blank
-      end
-    end
-  end
-
-  def self.award_white?(code, guess, index, guess_color)
-    if code.include?(guess_color) 
-      guesses_of_color_checked = guess[0..index].select { |c| c == guess_color }
-      color_count_in_code = code.select { |c| c == guess_color }
-      guesses_of_color_checked.length <= color_count_in_code.length
-    else
-      false
     end
   end
 end
@@ -54,13 +32,13 @@ class Round
     @display.show_code(code)
     until code_broken
       guess = @codebreaker.get_guess
+      @display.show_pegs(guess)
       if guess == code
         code_broken = true
       else
         @guess_count += 1
-        result = Mastermind.get_result(code, guess)
-        @display.show_pegs(guess)
-        @display.show_pegs(result)
+        feedback_pegs = Feedback.new(code, guess).pegs
+        @display.show_pegs(feedback_pegs)
       end
     end
     @display.display_victory(@guess_count)
@@ -103,7 +81,8 @@ class Display
   }
 
 
-  def initialize
+  def initialize(debug)
+    @debug = debug
     @first_guess = true
     @colorize = false
     if Gem::Specification::find_all_by_name('colorize').any?
@@ -148,6 +127,12 @@ class Display
     end
   end
 
+  def get_play_again?
+    input = get_input("Play again? [yn]")
+    ["y", "yes"].include?(input.downcase)
+  end
+
+
   def colour_letters
     if @colorize
       COLORS.map do |c|
@@ -174,16 +159,16 @@ class Display
 
   def show_code(code)
     output("Code has been chosen!")
-    show_pegs(code, false)
+    show_pegs(code, @debug)
     output("Guess from 6 colours", :print)
     show_pegs(COLORS)
   end
 
-  def show_pegs(pegs, hide = false)
-    if hide
-      output(4.times.collect{ ICONS[:hidden] }.join)
-    else
+  def show_pegs(pegs, show = true)
+    if show
       output pegs.map{ |p| ICONS[p] }.join
+    else
+      output(4.times.collect{ ICONS[:hidden] }.join)
     end
   end
 
@@ -200,19 +185,7 @@ class Display
   end
 end
 
-m = Mastermind.new
+debug = ARGV[0] === 'debug'
+ARGV.clear
+m = Mastermind.new(debug)
 m.play
-# def color(index)
-#   normal = "\e[#{index}m#{index}\e[0m"
-#   bold = "\e[#{index}m\e[1m#{index}\e[0m"
-#   "#{normal}  #{bold}  "
-# end
-
-# 10.times do|index|
-#   line = color(index + 1)
-#   line += color(index + 30)
-#   line += color(index + 90)
-#   line += color(index + 40)
-#   line += color(index + 100)
-#   puts line
-# end
