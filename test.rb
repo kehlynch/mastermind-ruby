@@ -8,14 +8,14 @@ class FeedbackTest < Minitest::Test
   def test_white_not_awarded_if_too_few
     code = %i[yellow orange purple purple]
     guess = %i[purple purple purple orange]
-    expected = %i[white blank black white]
-    assert_equal Feedback.new(code, guess).pegs, expected
+    expected = %i[black white white]
+    assert_equal expected, Feedback.new(code, guess).pegs
   end
 
   def test_no_hits
     code = %i[yellow orange purple purple]
     guess = %i[red red red green]
-    expected = %i[blank blank blank blank]
+    expected = %i[]
     assert_equal Feedback.new(code, guess).pegs, expected
   end
 end
