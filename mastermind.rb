@@ -17,7 +17,7 @@ class Mastermind
   def play
     round = Round.new(@display, @codemaker, @codebreaker)
     round.play
-    play if @display.get_play_again?
+    play if @display.play_again?
   end
 end
 
