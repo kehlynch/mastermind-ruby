@@ -19,7 +19,7 @@ guess 2 > grry
 ```
 
 ## Colour output
-If the [colorize gem](https://github.com/fazibear/colorize) the guess hints will be coloured
+If the [colorize gem](https://github.com/fazibear/colorize) is installed the guess hints will be coloured
 ```
 $ gem install colorize
 ```

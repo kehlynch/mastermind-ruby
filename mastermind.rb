@@ -1,8 +1,8 @@
-require './round.rb'
-require './feedback.rb'
-require './codemaker.rb'
-require './codebreaker.rb'
-require './display.rb'
+require './lib/round.rb'
+require './lib/feedback.rb'
+require './lib/codemaker.rb'
+require './lib/codebreaker.rb'
+require './lib/display.rb'
 
 CODE_COLORS = %i[red green blue yellow purple orange].freeze
 

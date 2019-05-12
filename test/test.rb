@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require './feedback.rb'
+require '../lib/feedback.rb'
 
 # tests for the feedback class
 class FeedbackTest < Minitest::Test
