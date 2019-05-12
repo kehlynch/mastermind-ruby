@@ -96,7 +96,6 @@ class Display
   end
 
   def color_letters
-    p @code_colors
     if @colorize
       @code_colors.map do |c|
         c[0].colorize(color: COLORS[c])
